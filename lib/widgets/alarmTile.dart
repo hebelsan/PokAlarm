@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './alarmItem.dart';
+import './../datastructures/alarmItem.dart';
 
 class AlarmTile extends StatefulWidget {
   final AlarmItem alarmItem;
