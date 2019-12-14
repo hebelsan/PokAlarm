@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './screens/homeScreen.dart';
+import './routes.dart';
 
 void main() => runApp(MyApp());
 
@@ -9,7 +9,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'PokAlarm',
+      initialRoute: '/',
+      routes: myRoutes,
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: Colors.lightBlue[800],
@@ -17,7 +19,6 @@ class MyApp extends StatelessWidget {
 
         fontFamily: 'Montserrat',
       ),
-      home: HomeScreen(title: 'PokAlarm'),
     );
   }
 }

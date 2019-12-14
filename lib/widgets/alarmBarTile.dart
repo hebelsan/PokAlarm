@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 import './../datastructures/alarmItem.dart';
 
-class AlarmTile extends StatefulWidget {
+class AlarmBarTile extends StatefulWidget {
   final AlarmItem alarmItem;
 
-  AlarmTile(this.alarmItem);
+  AlarmBarTile(this.alarmItem);
 
   @override
   _AlarmTileState createState() => new _AlarmTileState();
 }
 
-class _AlarmTileState extends State<AlarmTile> {
+class _AlarmTileState extends State<AlarmBarTile> {
   bool _isSwitched = false;
 
   void _onSwitch(value) {

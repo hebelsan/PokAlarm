@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './../widgets/alarmTile.dart';
+import './../widgets/alarmBarTile.dart';
 import './../datastructures/alarmItem.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -14,11 +14,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _numAlarms = 0;
-  List<AlarmTile> alarmTiles = [];
+  List<AlarmBarTile> alarmTiles = [];
 
-  void _incrementCounter() {
+  void _addAlarm() {
+    Navigator.pushNamed(context, '/setTime');
     AlarmItem ai = AlarmItem("Timer is set on 7:00", false);
-    alarmTiles.add(AlarmTile(ai));
+    alarmTiles.add(AlarmBarTile(ai));
     setState(() {
       _numAlarms++;
     });
@@ -44,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: _addAlarm,
         tooltip: 'Add new alarm',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
