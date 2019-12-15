@@ -16,13 +16,16 @@ class _HomeScreenState extends State<HomeScreen> {
   int _numAlarms = 0;
   List<AlarmBarTile> alarmTiles = [];
 
-  void _addAlarm() {
-    Navigator.pushNamed(context, '/setTime');
-    AlarmItem ai = AlarmItem("Timer is set on 7:00", false);
+  void addTimerCallback(ai) {
     alarmTiles.add(AlarmBarTile(ai));
     setState(() {
       _numAlarms++;
     });
+  }
+
+  void _addAlarm() {
+    AlarmItem ai = AlarmItem("Timer is set on ", false, addTimerCallback);
+    Navigator.pushNamed(context, '/setTime', arguments: ai);
   }
 
   @override

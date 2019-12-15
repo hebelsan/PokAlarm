@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:numberpicker/numberpicker.dart';
+
+import './../widgets/timePickerTile.dart';
+import './../datastructures/alarmItem.dart';
 
 class SetTimeScreen extends StatelessWidget {
   final String title;
+  final AlarmItem alarmItem;
 
-  SetTimeScreen({this.title});
+  SetTimeScreen({this.title, this.alarmItem});
 
-  int _currValueHour = 0;
-  int _currValueMin = 0;
-
-  void _handleChangeHour(num) {
-    _currValueHour = num;
-  }
-
-  void _handleChangeMin(num) {
-    _currValueMin = num;
+  void _onSetTime(context) {
+    alarmItem.createTimeObject();
+    Navigator.pop(context);
+    alarmItem.addTimerCallback(alarmItem);
   }
 
   @override
@@ -27,24 +25,9 @@ class SetTimeScreen extends StatelessWidget {
       body: Center(
         child: Column(
           children: <Widget>[
-            Row(
-              children: <Widget>[
-                NumberPicker.integer(
-                  initialValue: _currValueHour,
-                  minValue: 0,
-                  maxValue: 23,
-                  onChanged: _handleChangeHour),
-                Text(':'),
-                NumberPicker.integer(
-                  initialValue: _currValueMin,
-                  minValue: 0,
-                  maxValue: 59,
-                  onChanged: _handleChangeMin),
-              ],
-            ),
-              
+            TimePickerTile(alarmItem),
             RaisedButton(
-              onPressed: () {Navigator.pop(context);},
+              onPressed: () => _onSetTime(context),
               child: Text(
                 'Set Time',
                 style: TextStyle(fontSize: 20)

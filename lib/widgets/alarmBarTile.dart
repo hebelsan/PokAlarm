@@ -32,7 +32,10 @@ class _AlarmTileState extends State<AlarmBarTile> {
         Row(
           children: <Widget>[
             Expanded(
-              child: Text(this.widget.alarmItem.text, textAlign:TextAlign.left),
+              child: Text(this.widget.alarmItem.text 
+              + this.widget.alarmItem.hours.toString() 
+              + ':' + this.widget.alarmItem.minutes.toString()
+              , textAlign:TextAlign.left),
             ),
             Expanded(
               child: Switch(

@@ -11,7 +11,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'PokAlarm',
       initialRoute: '/',
-      routes: myRoutes,
+      onGenerateRoute: (RouteSettings settings) {
+        return MaterialPageRoute(
+          builder: (BuildContext context) => makeRoute(
+                context: context,
+                routeName: settings.name,
+                arguments: settings.arguments,
+              ),
+          maintainState: true,
+          fullscreenDialog: false,
+        );
+      },
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: Colors.lightBlue[800],
