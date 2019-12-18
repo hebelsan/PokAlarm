@@ -1,12 +1,12 @@
 class AlarmItem {
-  final String text;
   final Function addTimerCallback;
+  String text;
   bool isOn;
   int hours = 0;
   int minutes = 0;
-  var timeObject;
+  DateTime timeObject;
 
-  AlarmItem(this.text, this.isOn, this.addTimerCallback);
+  AlarmItem(this.isOn, this.addTimerCallback);
 
   void setValue(bool value) {
       isOn = value;
@@ -20,7 +20,13 @@ class AlarmItem {
     minutes = m;
   }
 
-  void createTimeObject() {
-    timeObject = new DateTime(minutes=this.minutes, hours=this.hours);
+  void createTimeObject(DateTime now) {
+    int day = now.day;
+    text = 'Today';
+    if (this.hours < now.hour || (this.hours == now.hour && this.minutes <= now.minute)) {
+      day += 1;
+      text = 'Tomorrow';
+    } 
+    timeObject = new DateTime(now.year, now.month, day, this.hours, this.minutes);
   }
 }

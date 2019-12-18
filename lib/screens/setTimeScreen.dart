@@ -10,7 +10,7 @@ class SetTimeScreen extends StatelessWidget {
   SetTimeScreen({this.title, this.alarmItem});
 
   void _onSetTime(context) {
-    alarmItem.createTimeObject();
+    alarmItem.createTimeObject(DateTime.now());
     Navigator.pop(context);
     alarmItem.addTimerCallback(alarmItem);
   }

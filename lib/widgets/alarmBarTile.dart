@@ -8,17 +8,28 @@ class AlarmBarTile extends StatefulWidget {
   AlarmBarTile(this.alarmItem);
 
   @override
-  _AlarmTileState createState() => new _AlarmTileState();
+  _AlarmTileState createState() => new _AlarmTileState(alarmItem.isOn);
 }
 
 class _AlarmTileState extends State<AlarmBarTile> {
-  bool _isSwitched = false;
+  bool _isSwitched;
+
+  _AlarmTileState(this._isSwitched);
 
   void _onSwitch(value) {
     this.widget.alarmItem.setValue(value);
     setState(() {
       _isSwitched = value;
     });
+  }
+
+  String _buildTimeStringHelper() {
+    return 
+      this.widget.alarmItem.text +
+      ' at: ' +
+      this.widget.alarmItem.timeObject.hour.toString() +
+      ':' + 
+      this.widget.alarmItem.timeObject.minute.toString();
   }
 
   @override
@@ -32,10 +43,9 @@ class _AlarmTileState extends State<AlarmBarTile> {
         Row(
           children: <Widget>[
             Expanded(
-              child: Text(this.widget.alarmItem.text 
-              + this.widget.alarmItem.hours.toString() 
-              + ':' + this.widget.alarmItem.minutes.toString()
-              , textAlign:TextAlign.left),
+              child: Text(
+                _buildTimeStringHelper(),
+                textAlign:TextAlign.left),
             ),
             Expanded(
               child: Switch(
