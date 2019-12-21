@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import './../datastructures/alarmItem.dart';
+import './../datastructures/audioManager.dart';
 
 class AlarmBarTile extends StatefulWidget {
   final AlarmItem alarmItem;
@@ -16,8 +17,12 @@ class _AlarmTileState extends State<AlarmBarTile> {
 
   _AlarmTileState(this._isSwitched);
 
-  void _onSwitch(value) {
+  Future<void> _onSwitch(value) async {
     this.widget.alarmItem.setValue(value);
+    // final bool isAlarmMaxVolume = await AudioManager.isAlarmVolumeMax();
+    // if (value == true && ! isAlarmMaxVolume) {
+    //  print('open popup');
+    //}
     setState(() {
       _isSwitched = value;
     });
