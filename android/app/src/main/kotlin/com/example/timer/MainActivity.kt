@@ -5,7 +5,14 @@ import android.os.Bundle
 import io.flutter.app.FlutterActivity
 import io.flutter.plugins.GeneratedPluginRegistrant
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.EventChannel
 
+import java.util.concurrent.TimeUnit
+
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
+
+import android.util.Log
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -18,49 +25,81 @@ import android.os.Build.VERSION_CODES
 class MainActivity: FlutterActivity() {
   private val CHANNEL = "alarm.flutter.dev/audio"
 
+  private val STREAM_TAG = "alarm.eventchannel.sample/stream";
+
+  private var timerSubscription : Disposable? = null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     GeneratedPluginRegistrant.registerWith(this)
 
-    MethodChannel(flutterView, CHANNEL).setMethodCallHandler { call, result ->
-      when(call.method) {
-        "getBatteryLevel" -> {
-            val batteryLevel = getBatteryLevel()
-            if (batteryLevel != -1) {
-              result.success(batteryLevel)
-            } else {
-              result.error("UNAVAILABLE", "Battery level not available.", null)
-            }
+    Log.w("HELLO_TAG", "Start OnCreate...")
+
+    // MethodChannel(flutterView, CHANNEL).setMethodCallHandler { call, result ->
+    //   when(call.method) {
+    //     "getBatteryLevel" -> {
+    //         val batteryLevel = getBatteryLevel()
+    //         if (batteryLevel != -1) {
+    //           result.success(batteryLevel)
+    //         } else {
+    //           result.error("UNAVAILABLE", "Battery level not available.", null)
+    //         }
+    //     }
+    //     "getAudioAlarmVolume" -> {
+    //         val audioLevel = getAudioAlarmVolume()
+    //         if (audioLevel != -1) {
+    //         result.success(audioLevel)
+    //         } else {
+    //         result.error("UNAVAILABLE", "Audio level not available.", null)
+    //         }
+    //     }
+    //     "isAlarmMuted" -> {
+    //         val isMuted = isAlarmMuted()
+    //         //if (audioLevel != -1) {
+    //         result.success(isMuted)
+    //         //} else {
+    //         //  result.error("UNAVAILABLE", "Audio level not available.", null)
+    //         //}
+    //     }
+    //     "isAlarmMaxVolume" -> {
+    //         val isAlarmMaxVol = isAlarmMaxVolume()
+    //         //if (audioLevel != -1) {
+    //         result.success(isAlarmMaxVol)
+    //         //} else {
+    //         //  result.error("UNAVAILABLE", "Audio level not available.", null)
+    //         //}
+    //     }
+    //     else -> {
+    //         result.notImplemented();
+    //     }
+    //   }
+    // }
+
+    EventChannel(getFlutterView(), STREAM_TAG).setStreamHandler(
+      object : EventChannel.StreamHandler {
+        override fun onListen(arguments: Any?, events: EventChannel.EventSink) {
+          Log.w("TAG", "adding listener")
+          this@MainActivity.timerSubscription = Observable.interval(1000, TimeUnit.MILLISECONDS)
+             .subscribe (
+               {  
+                 Log.w("Test", "Result we just received: $it"); 
+                 events.success(it);
+               } // OnSuccess
+               //{ error -> events.error("STREAM", "Error in processing observable", error); }, // OnError
+               //{ println("Complete"); } // OnCompletion
+             )
         }
-        "getAudioAlarmVolume" -> {
-            val audioLevel = getAudioAlarmVolume()
-            if (audioLevel != -1) {
-            result.success(audioLevel)
-            } else {
-            result.error("UNAVAILABLE", "Audio level not available.", null)
-            }
+    
+        override fun onCancel(arguments: Any?) {
+          Log.w("TAG", "adding listener")
+          if (this@MainActivity.timerSubscription != null) {
+            this@MainActivity.timerSubscription?.dispose()
+            this@MainActivity.timerSubscription = null
+          }
         }
-        "isAlarmMuted" -> {
-            val isMuted = isAlarmMuted()
-            //if (audioLevel != -1) {
-            result.success(isMuted)
-            //} else {
-            //  result.error("UNAVAILABLE", "Audio level not available.", null)
-            //}
-        }
-        "isAlarmMaxVolume" -> {
-            val isAlarmMaxVol = isAlarmMaxVolume()
-            //if (audioLevel != -1) {
-            result.success(isAlarmMaxVol)
-            //} else {
-            //  result.error("UNAVAILABLE", "Audio level not available.", null)
-            //}
-        }
-        else -> {
-            result.notImplemented();
-        }
-      }  
-    }
+      }
+    )
+
   }
 
   private fun getBatteryLevel(): Int {
@@ -89,9 +128,9 @@ class MainActivity: FlutterActivity() {
 
   private fun isAlarmMuted(): Boolean {
     val isMuted: Boolean
-    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+    if (VERSION.SDK_INT >= VERSION_CODES.O) {
       val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-      isMuted = audioManager.isStreamMute(AudioManager.STREAM_ALARM);
+      isMuted = audioManager.isStreamMute(AudioManager.STREAM_ALARM)
     } else {
       // TODO Code for lower versions of android
       isMuted = false
@@ -116,4 +155,6 @@ class MainActivity: FlutterActivity() {
     }
     return isAlarmMax
   }
+
+
 }

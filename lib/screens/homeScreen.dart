@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import './../widgets/alarmBarTile.dart';
 import './../widgets/checkAlarmVolIcon.dart';
@@ -15,6 +18,38 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _numAlarms = 0;
   List<AlarmBarTile> alarmTiles = [];
+
+
+
+  static const stream =
+    const EventChannel('alarm.eventchannel.sample/stream');
+
+  StreamSubscription _timerSubscription;
+
+  void _enableTimer() {
+    if (_timerSubscription == null) {
+      _timerSubscription = stream.receiveBroadcastStream().listen(_updateTimer);
+    }
+  }
+
+  void errorHandler(dynamic error) => print('Received error: ${error.message}');
+
+  void _disableTimer() {
+    if (_timerSubscription != null) {
+      _timerSubscription.cancel();
+      _timerSubscription = null;
+    }
+  }
+
+  void _updateTimer(timer) {
+    debugPrint("Timer $timer");
+  }
+
+
+
+
+
+
 
   void addTimerCallback(ai) {
     alarmTiles.add(AlarmBarTile(ai));
@@ -44,7 +79,11 @@ class _HomeScreenState extends State<HomeScreen> {
               '$_numAlarms',
               style: Theme.of(context).textTheme.display1,
             ),
-            CheckAlarmVolIcon(),
+            // CheckAlarmVolIcon(),
+            new FlatButton(
+              child: const Text('Enable'),
+              onPressed: _enableTimer,
+            ),
           ],
         ),
       ),
