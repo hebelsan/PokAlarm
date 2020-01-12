@@ -45,12 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
     debugPrint("Timer $timer");
   }
 
-
-
-
-
-
-
   void addTimerCallback(ai) {
     alarmTiles.add(AlarmBarTile(ai));
     setState(() {

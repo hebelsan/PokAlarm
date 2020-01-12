@@ -1,17 +1,20 @@
 package com.example.timer
 
-import android.os.Bundle
-
-import io.flutter.app.FlutterActivity
 import io.flutter.plugins.GeneratedPluginRegistrant
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.EventChannel
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+
 
 import java.util.concurrent.TimeUnit
 
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
+import androidx.annotation.NonNull
 import android.util.Log
 import android.content.Context
 import android.content.ContextWrapper
@@ -29,9 +32,8 @@ class MainActivity: FlutterActivity() {
 
   private var timerSubscription : Disposable? = null
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    GeneratedPluginRegistrant.registerWith(this)
+  override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+    GeneratedPluginRegistrant.registerWith(flutterEngine)
 
     Log.w("HELLO_TAG", "Start OnCreate...")
 
@@ -75,18 +77,20 @@ class MainActivity: FlutterActivity() {
     //   }
     // }
 
-    EventChannel(getFlutterView(), STREAM_TAG).setStreamHandler(
+    EventChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), STREAM_TAG).setStreamHandler(
       object : EventChannel.StreamHandler {
         override fun onListen(arguments: Any?, events: EventChannel.EventSink) {
           Log.w("TAG", "adding listener")
-          this@MainActivity.timerSubscription = Observable.interval(1000, TimeUnit.MILLISECONDS)
+          this@MainActivity.timerSubscription = Observable
+             .interval(1000, TimeUnit.MILLISECONDS)
+             .observeOn(AndroidSchedulers.mainThread())
              .subscribe (
                {  
                  Log.w("Test", "Result we just received: $it"); 
                  events.success(it);
-               } // OnSuccess
-               //{ error -> events.error("STREAM", "Error in processing observable", error); }, // OnError
-               //{ println("Complete"); } // OnCompletion
+               }, // OnSuccess
+               { error -> events.error("STREAM", "Error in processing observable", error); }, // OnError
+               { println("Complete"); } // OnCompletion
              )
         }
     
