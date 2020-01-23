@@ -46,6 +46,7 @@ class AudioManager {
 
   static Future<int> getAudioAlarmVolume() async {
     await _getAudioAlarmVolume();
+    print("test");
     return _audioLevel;
   }
 }

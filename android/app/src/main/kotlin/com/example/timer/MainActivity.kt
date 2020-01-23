@@ -40,14 +40,14 @@ class MainActivity: FlutterActivity() {
   private lateinit var mRunnable:Runnable
 
   private var sco: SettingsContentObserver? = null
-  private var channel: MethodChannel? = null
+  private lateinit var channel: MethodChannel
 
   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
     GeneratedPluginRegistrant.registerWith(flutterEngine)
 
     // register methods to get batteryLevel etc.
     channel = MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
-    channel?.setMethodCallHandler { call, result ->
+    channel.setMethodCallHandler { call, result ->
       when(call.method) {
         "getBatteryLevel" -> {
             val batteryLevel = getBatteryLevel()
@@ -138,7 +138,7 @@ class MainActivity: FlutterActivity() {
 
     override fun onChange(selfChange: Boolean) {
         val currentVolume: Int = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        //channel.invokeMethod
+        channel.invokeMethod("getAudioAlarmVolume");
         // https://stackoverflow.com/questions/50187680/flutter-how-to-call-methods-in-dart-portion-of-the-app-from-the-native-platfor
         
         Log.d("TAG", "Volume now " + currentVolume);
