@@ -40,17 +40,14 @@ class MainActivity: FlutterActivity() {
   private lateinit var mRunnable:Runnable
 
   private var sco: SettingsContentObserver? = null
+  private var channel: MethodChannel? = null
 
   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
     GeneratedPluginRegistrant.registerWith(flutterEngine)
 
-    // https://stackoverflow.com/questions/11318933/listen-to-volume-changes-events-on-android
-    sco = SettingsContentObserver(getApplicationContext(), Handler())
-    getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, sco);
-
     // register methods to get batteryLevel etc.
-    MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
-      .setMethodCallHandler { call, result ->
+    channel = MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
+    channel?.setMethodCallHandler { call, result ->
       when(call.method) {
         "getBatteryLevel" -> {
             val batteryLevel = getBatteryLevel()
@@ -90,6 +87,11 @@ class MainActivity: FlutterActivity() {
       }
     }
 
+    // https://stackoverflow.com/questions/11318933/listen-to-volume-changes-events-on-android
+    sco = SettingsContentObserver(getApplicationContext(), Handler(), channel)
+    getApplicationContext().getContentResolver().
+        registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, sco);
+
     // Observer sends a timer every second
     EventChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), STREAM_TAG).setStreamHandler(
       object : EventChannel.StreamHandler {
@@ -123,9 +125,11 @@ class MainActivity: FlutterActivity() {
 
   class SettingsContentObserver: ContentObserver {
     val audioManager: AudioManager
+    val channel: MethodChannel
 
-    constructor(context: Context, handler: Handler) : super(handler) {
+    constructor(context: Context, handler: Handler, mChannel: MethodChannel) : super(handler) {
       audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+      channel = mChannel
     }
 
     override fun deliverSelfNotifications(): Boolean {
@@ -134,7 +138,9 @@ class MainActivity: FlutterActivity() {
 
     override fun onChange(selfChange: Boolean) {
         val currentVolume: Int = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-
+        //channel.invokeMethod
+        // https://stackoverflow.com/questions/50187680/flutter-how-to-call-methods-in-dart-portion-of-the-app-from-the-native-platfor
+        
         Log.d("TAG", "Volume now " + currentVolume);
     }
   }
