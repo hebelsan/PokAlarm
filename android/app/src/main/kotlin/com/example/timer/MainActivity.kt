@@ -138,9 +138,9 @@ class MainActivity: FlutterActivity() {
 
     override fun onChange(selfChange: Boolean) {
         val currentVolume: Int = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        channel.invokeMethod("getAudioAlarmVolume");
+        channel.invokeMethod("getAudioAlarmVolume", "uijf");
         // https://stackoverflow.com/questions/50187680/flutter-how-to-call-methods-in-dart-portion-of-the-app-from-the-native-platfor
-        
+        // https://stablekernel.com/flutter-platform-channels-quick-start/
         Log.d("TAG", "Volume now " + currentVolume);
     }
   }
