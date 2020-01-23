@@ -16,82 +16,97 @@ import io.reactivex.schedulers.Schedulers;
 
 import androidx.annotation.NonNull
 import android.util.Log
+import android.media.AudioManager
+import android.database.ContentObserver
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.BroadcastReceiver;
+import android.os.Bundle;
 import android.os.BatteryManager
-import android.media.AudioManager
+import android.os.Handler
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 
+
 class MainActivity: FlutterActivity() {
   private val CHANNEL = "alarm.flutter.dev/audio"
-
   private val STREAM_TAG = "alarm.eventchannel.sample/stream";
 
   private var timerSubscription : Disposable? = null
 
+  private lateinit var mHandler: Handler
+  private lateinit var mRunnable:Runnable
+
+  private var sco: SettingsContentObserver? = null
+
   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
     GeneratedPluginRegistrant.registerWith(flutterEngine)
 
-    Log.w("HELLO_TAG", "Start OnCreate...")
+    // https://stackoverflow.com/questions/11318933/listen-to-volume-changes-events-on-android
+    sco = SettingsContentObserver(getApplicationContext(), Handler())
+    getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, sco);
 
-    // MethodChannel(flutterView, CHANNEL).setMethodCallHandler { call, result ->
-    //   when(call.method) {
-    //     "getBatteryLevel" -> {
-    //         val batteryLevel = getBatteryLevel()
-    //         if (batteryLevel != -1) {
-    //           result.success(batteryLevel)
-    //         } else {
-    //           result.error("UNAVAILABLE", "Battery level not available.", null)
-    //         }
-    //     }
-    //     "getAudioAlarmVolume" -> {
-    //         val audioLevel = getAudioAlarmVolume()
-    //         if (audioLevel != -1) {
-    //         result.success(audioLevel)
-    //         } else {
-    //         result.error("UNAVAILABLE", "Audio level not available.", null)
-    //         }
-    //     }
-    //     "isAlarmMuted" -> {
-    //         val isMuted = isAlarmMuted()
-    //         //if (audioLevel != -1) {
-    //         result.success(isMuted)
-    //         //} else {
-    //         //  result.error("UNAVAILABLE", "Audio level not available.", null)
-    //         //}
-    //     }
-    //     "isAlarmMaxVolume" -> {
-    //         val isAlarmMaxVol = isAlarmMaxVolume()
-    //         //if (audioLevel != -1) {
-    //         result.success(isAlarmMaxVol)
-    //         //} else {
-    //         //  result.error("UNAVAILABLE", "Audio level not available.", null)
-    //         //}
-    //     }
-    //     else -> {
-    //         result.notImplemented();
-    //     }
-    //   }
-    // }
+    // register methods to get batteryLevel etc.
+    MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
+      .setMethodCallHandler { call, result ->
+      when(call.method) {
+        "getBatteryLevel" -> {
+            val batteryLevel = getBatteryLevel()
+            if (batteryLevel != -1) {
+              result.success(batteryLevel)
+            } else {
+              result.error("UNAVAILABLE", "Battery level not available.", null)
+            }
+        }
+        "getAudioAlarmVolume" -> {
+            val audioLevel = getAudioAlarmVolume()
+            if (audioLevel != -1) {
+            result.success(audioLevel)
+            } else {
+            result.error("UNAVAILABLE", "Audio level not available.", null)
+            }
+        }
+        "isAlarmMuted" -> {
+            val isMuted = isAlarmMuted()
+            //if (audioLevel != -1) {
+            result.success(isMuted)
+            //} else {
+            //  result.error("UNAVAILABLE", "Audio level not available.", null)
+            //}
+        }
+        "isAlarmMaxVolume" -> {
+            val isAlarmMaxVol = isAlarmMaxVolume()
+            //if (audioLevel != -1) {
+            result.success(isAlarmMaxVol)
+            //} else {
+            //  result.error("UNAVAILABLE", "Audio level not available.", null)
+            //}
+        }
+        else -> {
+            result.notImplemented();
+        }
+      }
+    }
 
+    // Observer sends a timer every second
     EventChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), STREAM_TAG).setStreamHandler(
       object : EventChannel.StreamHandler {
         override fun onListen(arguments: Any?, events: EventChannel.EventSink) {
-          Log.w("TAG", "adding listener")
-          this@MainActivity.timerSubscription = Observable
-             .interval(1000, TimeUnit.MILLISECONDS)
-             .observeOn(AndroidSchedulers.mainThread())
-             .subscribe (
-               {  
-                 Log.w("Test", "Result we just received: $it"); 
-                 events.success(it);
-               }, // OnSuccess
-               { error -> events.error("STREAM", "Error in processing observable", error); }, // OnError
-               { println("Complete"); } // OnCompletion
-             )
+          // this@MainActivity.timerSubscription = Observable
+          //    .interval(1000, TimeUnit.MILLISECONDS)
+          //    .observeOn(AndroidSchedulers.mainThread())
+          //    .subscribe (
+          //      {  
+          //        Log.w("Test", "Result we just received: $it"); 
+          //        events.success(it);
+          //      }, // OnSuccess
+          //      { error -> events.error("STREAM", "Error in processing observable", error); }, // OnError
+          //      { println("Complete"); } // OnCompletion
+          //    )
+
+          startListening(events)
         }
     
         override fun onCancel(arguments: Any?) {
@@ -104,6 +119,45 @@ class MainActivity: FlutterActivity() {
       }
     )
 
+  }
+
+  class SettingsContentObserver: ContentObserver {
+    val audioManager: AudioManager
+
+    constructor(context: Context, handler: Handler) : super(handler) {
+      audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    }
+
+    override fun deliverSelfNotifications(): Boolean {
+        return false;
+    }
+
+    override fun onChange(selfChange: Boolean) {
+        val currentVolume: Int = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+
+        Log.d("TAG", "Volume now " + currentVolume);
+    }
+  }
+  
+
+  private fun startListening(events: EventChannel.EventSink) {
+    mHandler = Handler()
+
+    mRunnable = Runnable {
+      events.success(1);
+
+      // Schedule the task to repeat after 1 second
+      mHandler.postDelayed(
+              mRunnable, // Runnable
+              1000 // Delay in milliseconds
+      )
+    }
+
+    // Schedule the task to repeat after 1 second
+    mHandler.postDelayed(
+            mRunnable, // Runnable
+            1000 // Delay in milliseconds
+    )
   }
 
   private fun getBatteryLevel(): Int {
