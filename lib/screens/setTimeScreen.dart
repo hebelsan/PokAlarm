@@ -26,12 +26,9 @@ class SetTimeScreen extends StatelessWidget {
         child: Column(
           children: <Widget>[
             TimePickerTile(alarmItem),
-            RaisedButton(
+            ElevatedButton(
               onPressed: () => _onSetTime(context),
-              child: Text(
-                'Set Time',
-                style: TextStyle(fontSize: 20)
-              ),
+              child: Text('Set Time', style: TextStyle(fontSize: 20)),
             ),
           ],
         ),

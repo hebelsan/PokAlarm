@@ -22,7 +22,6 @@ Function generatedRoutes = (settings) {
   }
 };
 
-
 Widget makeRoute(
     {@required BuildContext context,
     @required String routeName,

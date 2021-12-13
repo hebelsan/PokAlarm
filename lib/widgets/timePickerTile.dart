@@ -40,30 +40,25 @@ class _TimPickerState extends State<TimePickerTile> {
 
   @override
   Widget build(BuildContext context) {
-    return
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          NumberPicker.integer(
-            initialValue: _currValueHour,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        NumberPicker(
+            value: _currValueHour,
             minValue: 0,
             maxValue: 23,
-            infiniteLoop: true,
-            highlightSelectedValue: true,
             decoration: _decoration,
-            onChanged: _handleChangeHour
-            ),
-          Text(':'),
-          NumberPicker.integer(
-            initialValue: _currValueMin,
+            infiniteLoop: true,
+            onChanged: _handleChangeHour),
+        Text(':'),
+        NumberPicker(
+            value: _currValueMin,
             minValue: 0,
             maxValue: 59,
-            infiniteLoop: true,
-            highlightSelectedValue: true,
             decoration: _decoration,
-            onChanged: _handleChangeMin
-            ),
-        ],
-      );
+            infiniteLoop: true,
+            onChanged: _handleChangeMin),
+      ],
+    );
   }
 }

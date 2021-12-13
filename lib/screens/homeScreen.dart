@@ -1,7 +1,4 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import './../widgets/alarmBarTile.dart';
 import './../widgets/checkAlarmVolIcon.dart';
@@ -19,27 +16,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int _numAlarms = 0;
   List<AlarmBarTile> alarmTiles = [];
 
-
-
-  static const stream =
-    const EventChannel('alarm.eventchannel.sample/stream');
-
-  StreamSubscription _timerSubscription;
-
-  void _enableTimer() {
-    if (_timerSubscription == null) {
-      _timerSubscription = stream.receiveBroadcastStream().listen(_updateTimer);
-    }
-  }
+  void _enableTimer() {}
 
   void errorHandler(dynamic error) => print('Received error: ${error.message}');
 
-  void _disableTimer() {
-    if (_timerSubscription != null) {
-      _timerSubscription.cancel();
-      _timerSubscription = null;
-    }
-  }
+  void _disableTimer() {}
 
   void _updateTimer(timer) {
     debugPrint("Timer $timer");
@@ -68,13 +49,13 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           //mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            for(var alarm in alarmTiles ) alarm,
+            for (var alarm in alarmTiles) alarm,
             Text(
               '$_numAlarms',
-              style: Theme.of(context).textTheme.display1,
+              style: Theme.of(context).textTheme.bodyText1,
             ),
-            // CheckAlarmVolIcon(),
-            new FlatButton(
+            CheckAlarmVolIcon(),
+            new TextButton(
               child: const Text('Enable'),
               onPressed: _enableTimer,
             ),
