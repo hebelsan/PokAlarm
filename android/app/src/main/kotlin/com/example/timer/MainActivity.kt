@@ -5,14 +5,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.EventChannel
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-
-
-import java.util.concurrent.TimeUnit
-
-import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 import androidx.annotation.NonNull
 import android.util.Log
@@ -22,8 +15,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.BroadcastReceiver;
-import android.os.Bundle;
 import android.os.BatteryManager
 import android.os.Handler
 import android.os.Build.VERSION
@@ -39,7 +30,6 @@ class MainActivity: FlutterActivity() {
   private lateinit var mHandler: Handler
   private lateinit var mRunnable:Runnable
 
-  private var sco: SettingsContentObserver? = null
   private lateinit var channel: MethodChannel
 
   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
@@ -88,7 +78,7 @@ class MainActivity: FlutterActivity() {
     }
 
     // https://stackoverflow.com/questions/11318933/listen-to-volume-changes-events-on-android
-    sco = SettingsContentObserver(getApplicationContext(), Handler(), channel)
+    val sco = SettingsContentObserver(getApplicationContext(), Handler(), channel)
     getApplicationContext().getContentResolver().
         registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, sco);
 

@@ -9,7 +9,7 @@ class AlarmItem {
   AlarmItem(this.isOn, this.addTimerCallback);
 
   void setValue(bool value) {
-      isOn = value;
+    isOn = value;
   }
 
   void setHours(int h) {
@@ -23,10 +23,12 @@ class AlarmItem {
   void createTimeObject(DateTime now) {
     int day = now.day;
     text = 'Today';
-    if (this.hours < now.hour || (this.hours == now.hour && this.minutes <= now.minute)) {
+    if (this.hours < now.hour ||
+        (this.hours == now.hour && this.minutes <= now.minute)) {
       day += 1;
       text = 'Tomorrow';
-    } 
-    timeObject = new DateTime(now.year, now.month, day, this.hours, this.minutes);
+    }
+    timeObject =
+        new DateTime(now.year, now.month, day, this.hours, this.minutes);
   }
 }
